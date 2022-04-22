@@ -1,26 +1,33 @@
-// const Hello = function () {
-//   <p>Hello</p>;
-// };
-//화살표 함수
-// const Hello = () => {
-//   <p>Hello</p>;
-// };
-
-import styles from "./Hello.module.css";
 export default function Hello() {
+  function showName() {
+    console.log("Mike");
+  }
+  function showAge(txt) {
+    console.log(txt);
+  }
+  // function showText(e) {
+  //   console.log(e.target.value);
+  // }
+
   return (
     <div>
-      <h1
-        style={{
-          color: "#f00",
-          borderRight: "2px solid #000",
-          marginBottom: "50px",
-          opacity: 0.5,
+      <h1>Hello</h1>
+      <button onClick={showName}>Show name</button>
+      <button
+        onClick={() => {
+          showAge(10);
         }}
       >
-        Hello
-      </h1>
-      <div className={styles.box}>Hello</div>
+        Show age
+      </button>
+      <input
+        type="text"
+        onChange={(e) => {
+          const txt = e.target.value;
+          showAge(txt);
+          // console.log(e.target.value);
+        }}
+      />
     </div>
   ); //p태그는 리턴을 해줘야 오류가 안남
 }

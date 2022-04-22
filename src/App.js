@@ -6,7 +6,6 @@ function App() {
   return (
     <div className="App">
       <Hello />
-      <div className={styles.box}>App</div>
     </div>
   );
 }
