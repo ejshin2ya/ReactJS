@@ -1,4 +1,4 @@
-###useState
+##7 useState
 
 - 동일한 컴포넌트를 사용자 인터랙션에 따라 바뀌어야 할 때 구현을 도와주는 react hooks 중 하나이다.
 - 리액트 16.8 이후부터 Hooks라는 기능이 도입되면서 함수형 컴포넌트에서도 상태를 관리할 수 있게 되었다.
@@ -24,3 +24,73 @@ export default function Hello() {
   );
 }
 ```
+
+##8 props(properties의 줄임말)
+
+- state와 props은 많이 사용된다.
+- 컴포넌트에 있는 state를 props로도 사용가능하다.
+- props는 부모 컴포넌트가 자식 컴포넌트에게 값을 전달할때 사용하는 읽기전용 데이터이다.
+- 프로퍼티는 수정할 수 없다는 특징이 있다.
+
+```
+#App.js
+import "./App.css";
+import Hello from "./component/Hello";
+import styles from "./App.module.css";
+
+function App() {
+  return (
+    <div className="App">
+      <h3>props : properties</h3>
+      <Hello age={10} />
+      <Hello age={20} />
+      <Hello age={30} />
+    </div>
+  );
+}
+
+export default App;
+```
+
+```
+# Hello.js
+import { useState } from "react";
+import UserName from "./UserName";
+
+export default function Hello({ age }) {
+  // let name = "Mike";
+  const [name, setName] = useState("Mike"); //useState 배열 반환
+  // const [age, setAge] = useState(props.age);
+  const msg = age > 19 ? "성인 입니다" : "미성년자 입니다.";
+
+  return (
+    <div>
+      <h2 id="name">
+        {name}({age}) : {msg}
+      </h2>
+      <UserName name={name} />
+      <button
+        onClick={() => {
+          setName(name === "Mike" ? "Jane" : "Mike");
+          // setAge(age + 1);
+        }}
+      >
+        Change
+      </button>
+    </div>
+  );
+}
+```
+
+```
+#UserName.js
+export default function UserName({ name }) {
+  return <p>Hello,{name}</p>;
+}
+```
+
+![](2022-04-23-12-56-59.png)
+##state와 props의 활용
+
+- 각 컴포넌트마다 name의 값이 바뀌며(state),
+- 전달된 name이 UserName.js 자식 컴포넌트에서 활용되어 hello, Mike에 이름이 전달되어 name 데이터가 함께 변화되는 모습을 볼 수 있다.(props)
