@@ -1,33 +1,24 @@
-export default function Hello() {
-  function showName() {
-    console.log("Mike");
-  }
-  function showAge(txt) {
-    console.log(txt);
-  }
-  // function showText(e) {
-  //   console.log(e.target.value);
-  // }
+import { useState } from "react";
 
+export default function Hello() {
+  // let name = "Mike";
+  const [name, setName] = useState("Mike"); //useState 배열 반환
+  // function changeName() {
+  // const newName = name === "Mike" ? "Jane" : "Mike";
+  // console.log(name);
+  // document.getElementById("name").innerText = name;
+  // setName(name === "Mike" ? "Jane" : "Mike");
+  // }
   return (
     <div>
-      <h1>Hello</h1>
-      <button onClick={showName}>Show name</button>
+      <h2 id="name">{name}</h2>
       <button
         onClick={() => {
-          showAge(10);
+          setName(name === "Mike" ? "Jane" : "Mike");
         }}
       >
-        Show age
+        Change
       </button>
-      <input
-        type="text"
-        onChange={(e) => {
-          const txt = e.target.value;
-          showAge(txt);
-          // console.log(e.target.value);
-        }}
-      />
     </div>
-  ); //p태그는 리턴을 해줘야 오류가 안남
+  );
 }
