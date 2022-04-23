@@ -201,3 +201,104 @@ export default function Day() {
 ```
 
 ![](2022-04-23-23-09-48.png)
+
+## 10. 라우터 구현
+
+- npm install react-router-dom 명령어로 라우터 설치
+- 최근 v5에서 v6로 업그레이드 되었음.(v6부터는 Switch사용하지 않고 Route를 사용 등 바뀐부분 있음)
+- 전체를 BrowserRouter로 감싸준 후 header 컴포넌트는 Routes 밖에 입력하여 웹상단에 고정으로 나오게 해줌
+- Route는 path 값에 해당하는 값이 들어올때 element에 해당하는 컴포넌트를 출력해준다.
+
+* path에서 :를 사용하여 다이나믹한 값을 변수로 담아온다.
+
+```
+## App.js
+import Day from "./component/Day";
+import DayList from "./component/DayList";
+import Header from "./component/Header";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import EmptyPage from "./component/EmptyPage";
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <Header />
+        <Routes>
+          <Route exact path="/" element={<DayList />} />
+          <Route path="/day/:day" element={<Day />} />
+          <Route path="*" element={<EmptyPage />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+```
+
+- Link를 import 해서 html에서 <a>태그의 href 속성에 해당하는 Link to를 사용.
+- link to의 해당 url로 주소 이동.
+
+```
+## DayList.js
+import { Link } from "react-router-dom";
+import dummy from "../db/data.json";
+
+export default function DayList() {
+  return (
+    <ul className="list_day">
+      {dummy.days.map((day) => (
+        <li key={day.id}>
+          <Link to={`/day/${day.day}`}>Day {day.day}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+- useParams를 import하여 url 주소에 전달된 값을 꺼내올 수 있다.
+- useParams로 전달받은 day의 값은 문자열이기 때문에 Number(day)로 감싸주어 숫자로 변환해준다.
+
+```
+## Day.js
+import dummy from "../db/data.json";
+import { useParams } from "react-router-dom";
+
+export default function Day() {
+  const { day } = useParams();
+  const wordList = dummy.words.filter((word) => word.day === Number(day));
+
+  return (
+    <>
+      <h2>Day {day}</h2>
+      <table>
+        <tbody>
+          {wordList.map((word) => (
+            <tr key={word.id}>
+              <td>{word.eng}</td>
+              <td>{word.kor}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  );
+}
+```
+
+- App.js에서 Route에 등록되지 않은 모든 url주소는 EmptyPage.js로 가도록 해주었음
+- 예외 주소값을 처리해준다.
+
+```
+import { Link } from "react-router-dom";
+
+export default function EmptyPage() {
+  return (
+    <>
+      <h2>잘못된 접근입니다.</h2>
+      <Link to="/">돌아가기</Link>
+    </>
+  );
+}
+```
