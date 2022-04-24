@@ -738,3 +738,111 @@ export default function Header() {
  );
 }
 ```
+
+## 16. 로딩시 화면구현 및 중복 클릭 방지 방법
+
+> json 데이터를 읽어오는 동안 Loading 화면 구현
+
+- useFetch.js에서 읽어온 words와 days 데이터 값이 0일때 span 태그로 Loading... 화면 출력되도록 함
+
+```
+import { useParams } from "react-router-dom";
+import useFetch from "../hooks/useFetch";
+import Word from "./Word";
+
+export default function Day() {
+  const { day } = useParams();
+  const words = useFetch(`http://localhost:3001/words?day=${day}`);
+  return (
+    <>
+      <h2>Day {day}</h2>
+      {words.length === 0 && <span>Loading...</span>}
+      <table>
+        <tbody>
+          {words.map((word) => (
+            <Word word={word} key={word.id} />
+          ))}
+        </tbody>
+      </table>
+    </>
+  );
+}
+```
+
+> 통신중에 버튼을 여러번 눌러도 반응하지 않도록 함
+
+- useState(false)를 사용하여 isLoading state의 초기값을 false로 설정.
+- isLoading이 false일때만 함수실행되어 input에 입력된 단어정보가 json파일에 저장된다.
+- 동시에 setIsLoading이 state를 true로 바꿔줌으로써, isLoading이 true일때는 버튼이 Saving...으로 바뀌면서 클릭이 불가능하게 된다.
+- Json파일에 데이터 생성이 완료되면 setIsLoading이 다시 isLoading의 state를 false로 만들어준다.
+
+```
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useFetch from "../hooks/useFetch";
+
+export default function CreateWord() {
+  const days = useFetch("http://localhost:3001/days");
+  const navigator = useNavigate();
+  const [isLoading, setIsLoading] = useState(false); //통신중 버튼을 여러번 눌러도 반응하지 않도록 함
+
+  function onSubmit(e) {
+    e.preventDefault();
+
+    if (!isLoading) {
+      setIsLoading(true);
+      fetch(`http://localhost:3001/words/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          day: dayRef.current.value,
+          eng: engRef.current.value,
+          kor: korRef.current.value,
+          isDone: false,
+        }),
+      }).then((res) => {
+        if (res.ok) {
+          alert("생성이 완료 되었습니다.");
+          navigator(`/day/${dayRef.current.value}`);
+          setIsLoading(false);
+        }
+      });
+    }
+  }
+
+  const engRef = useRef(null);
+  const korRef = useRef(null);
+  const dayRef = useRef(null);
+  return (
+    <form onSubmit={onSubmit}>
+      <div className="input_area">
+        <label>Eng</label>
+        <input type="text" placeholder="computer" ref={engRef} />
+      </div>
+      <div className="input_area">
+        <label>Kor</label>
+        <input type="text" placeholder="컴퓨터" ref={korRef} />
+      </div>
+      <div className="input_area">
+        <label>Day</label>
+        <select ref={dayRef}>
+          {days.map((day) => (
+            <option key={day.id} value={day.day}>
+              {day.day}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button
+        style={{
+          opacity: isLoading ? 0.3 : 1,
+        }}
+      >
+        {isLoading ? "Saving..." : "저장"}
+      </button>
+    </form>
+  );
+}
+```
