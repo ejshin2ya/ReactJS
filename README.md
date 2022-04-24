@@ -561,3 +561,180 @@ export default function Word({ word: w }) {
     </tr>
     ```
 ````
+
+## 15. POST(생성), useNavigate()
+
+> POST(생성) 란?
+
+- 데이터를 Create하는 작업을 뜻한다.
+- 단어추가를 위한 POST 작업을 위해 CreateWord.js와 CreateDay.js 컴포넌트 생성
+
+> prevenDefault() 란?
+
+- return값에서 form태그 생성 후 post작업 실행시 새로고침이 되지 않도록 해준다.
+- 단어추가 버튼을 눌러도 새로고침이 되지 않도록 기본 기능을 막아준다.
+
+> useRef 란?
+
+- ref 설정을 하면 dom요소 생성 후 접근이 가능해진다.
+- input창에 입력된 값을 얻기 위해 사용
+- 스크롤 위치 확인, 포커스를 주는 등의 작업에 활용.
+- 여기서는 input창에 입력된 단어 정보 값을 가져와서 json파일에 생성해주기 위해 활용
+
+> useNavigate() 란?
+
+- react-router에서 지원해주는 기능
+- navigator에 url을 입력받으면, 해당 페이지로 이동시켜주는 기능을 한다.
+
+* Link to처럼 a태그를 이용하지 않고 페이지 전환시에 유용하게 사용
+
+> 새로 생성한 CreateWord.js 컴포넌트 코드
+
+```
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import useFetch from "../hooks/useFetch";
+
+export default function CreateWord() {
+  const days = useFetch("http://localhost:3001/days");
+  const navigator = useNavigate();
+
+  function onSubmit(e) {
+    e.preventDefault();
+
+    fetch(`http://localhost:3001/words/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        day: dayRef.current.value,
+        eng: engRef.current.value,
+        kor: korRef.current.value,
+        isDone: false,
+      }),
+    }).then((res) => {
+      if (res.ok) {
+        alert("생성이 완료 되었습니다.");
+        navigator(`/day/${dayRef.current.value}`);
+      }
+    });
+  }
+
+  const engRef = useRef(null);
+  const korRef = useRef(null);
+  const dayRef = useRef(null);
+  return (
+    <form onSubmit={onSubmit}>
+      <div className="input_area">
+        <label>Eng</label>
+        <input type="text" placeholder="computer" ref={engRef} />
+      </div>
+      <div className="input_area">
+        <label>Kor</label>
+        <input type="text" placeholder="컴퓨터" ref={korRef} />
+      </div>
+      <div className="input_area">
+        <label>Day</label>
+        <select ref={dayRef}>
+          {days.map((day) => (
+            <option key={day.id} value={day.day}>
+              {day.day}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button>저장</button>
+    </form>
+  );
+}
+```
+
+> 새로 생성한 CreateDay.js 컴포넌트 코드
+
+```
+import { useNavigate } from "react-router-dom";
+import useFetch from "../hooks/useFetch";
+
+export default function CreateDay() {
+  const days = useFetch("http://localhost:3001/days");
+  const navigator = useNavigate();
+  function addDay(e) {
+    e.preventDefault();
+
+    fetch(`http://localhost:3001/days/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        day: days.length + 1,
+      }),
+    }).then((res) => {
+      if (res.ok) {
+        alert("생성이 완료 되었습니다.");
+        navigator(`/`);
+      }
+    });
+  }
+  return (
+    <div>
+      <h3>현재 일수 : {days.length}일</h3>
+      <button onClick={addDay}>Day 추가</button>
+    </div>
+  );
+}
+```
+
+> App.js에서도 새로 생성된 컴포넌트의 Route 경로를 생성해준다.
+
+```
+import Day from "./component/Day";
+import DayList from "./component/DayList";
+import Header from "./component/Header";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import EmptyPage from "./component/EmptyPage";
+import CreateWord from "./component/CreateWord";
+import CreateDay from "./component/CreateDay";
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="App">
+        <Header />
+        <Routes>
+          <Route path="/" element={<DayList />} />
+          <Route path="/day/:day" element={<Day />} />
+          <Route path="*" element={<EmptyPage />} />
+          <Route path="/create_word" element={<CreateWord />} />
+          <Route path="/create_day" element={<CreateDay />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+```
+
+> Header.js에서도 새로만든 컴포넌트의 주소값을 Link to에 설정해준다.
+
+```
+import { Link } from "react-router-dom";
+export default function Header() {
+ return (
+   <div className="header">
+     <h1>
+       <Link to="/">토익 영단어(고급)</Link>
+     </h1>
+     <div className="menu">
+       <Link to="/create_word" className="link">
+         단어추가
+       </Link>
+       <Link to="/create_day" className="link">
+         Day 추가
+       </Link>
+     </div>
+   </div>
+ );
+}
+```
