@@ -401,3 +401,76 @@ export default function DayList() {
   );
 }
 ```
+
+## 13. Custom Hooks 만들기
+
+- DayList.js와 Day.js에서 json 데이터를 꺼내오는 과정에서 반복되는 로직이 발생하였다.
+- Custom Hooks를 이용하면 반복되는 로직을 여러 컴포넌트에서 쉽게 사용하고 수정도 가능하다.
+  \*useFetch.js 라는 이름으로 Custom Hooks를 만들었다.
+
+> useFetch.js
+
+```
+import { useEffect, useState } from "react";
+
+export default function useFetch(url) {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetch(url)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setData(data);
+      });
+  }, [url]);
+  return data;
+}
+```
+
+> Day.js
+
+```import { useParams } from "react-router-dom";
+import useFetch from "../hooks/useFetch";
+import Word from "./Word";
+
+export default function Day() {
+  const { day } = useParams();
+  const words = useFetch(`http://localhost:3001/words?day=${day}`);
+  return (
+    <>
+      <h2>Day {day}</h2>
+      <table>
+        <tbody>
+          {words.map((word) => (
+            <Word word={word} key={word.id} />
+          ))}
+        </tbody>
+      </table>
+    </>
+  );
+}
+```
+
+> DayList.js
+
+```
+import { Link } from "react-router-dom";
+import useFetch from "../hooks/useFetch";
+
+export default function DayList() {
+  const days = useFetch("http://localhost:3001/days");
+  return (
+    <ul className="list_day">
+      {days.map((day) => (
+        <li key={day.id}>
+          <Link to={`/day/${day.day}`}>Day {day.day}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+- Custom Hooks를 통해 DayList.js와 Day.js 컴포넌트의 코드가 간결해졌다.
