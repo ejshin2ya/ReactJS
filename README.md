@@ -236,7 +236,7 @@ function App() {
 export default App;
 ```
 
-- Link를 import 해서 html에서 <a>태그의 href 속성에 해당하는 Link to를 사용.
+- Link를 import 해서 html에서 a 태그의 href 속성에 해당하는 Link to를 사용.
 - link to의 해당 url로 주소 이동.
 
 ```
@@ -302,3 +302,54 @@ export default function EmptyPage() {
   );
 }
 ```
+
+## 11. json-server, REST API
+
+- 11강에서는 Word.js 컴포넌트를 만들어서 input type을 checkbox로 만들고, 함수를 이용해서 useState 사용 및 props로 {word} 입력받음
+- toggleShow()와 toggleDone()함수를 통해 체크박스 클릭시 행 전체가 회색으로 바뀌면서 외운단어와 외우지 못한 단어를 시각적으로 다르게 표시해줌.
+
+```
+## Word.js
+import { useState } from "react";
+
+export default function Word({ word }) {
+  const [isShow, setIsShow] = useState(false);
+  const [isDone, setIsDone] = useState(word.isDone);
+
+  function toggleShow() {
+    setIsShow(!isShow);
+  }
+  function toggleDone() {
+    setIsDone(!isDone);
+  }
+
+  return (
+    <tr className={isDone ? "off" : ""}>
+      <td>
+        <input type="checkbox" checked={isDone} onChange={toggleDone} />
+      </td>
+      <td>{word.eng}</td>
+      <td>{isShow && word.kor}</td>
+      <td>
+        <button onClick={toggleShow}>뜻 {isShow ? "숨기기" : "보기"}</button>
+        <button className="btn_del">삭제</button>
+      </td>
+    </tr>
+  );
+}
+```
+
+- 작은 프로젝트에서 REST API 구축을 위해서는 JSON server를 사용하는 것이 편리하다.
+- 새로운 터미널 창을 열어서 npm install -g json-server를 입력하여 설치
+- 설치 완료 후 json-server --watch ./src/db/data.json --port 3001를 입력하는데, watch이후부터는 프로젝트 경로로 유동적으로 작성되는 부분 port번호도 현재 port가 아닌 다른 번호로 입력해주었음.
+- 위 명령어 실행시 error 발생하여 구글링결과 문제 해결 (https://hellcoding.tistory.com/entry/VSCode-%EC%98%A4%EB%A5%98-%EC%9D%B4-%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%97%90%EC%84%9C-%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8%EB%A5%BC-%EC%8B%A4%ED%96%89%ED%95%A0-%EC%88%98-%EC%97%86%EC%9C%BC%EB%AF%80%EB%A1%9C) 블로그 참조하였음.
+
+> Rest API 이란?
+
+- REST를 기반으로 만들어진 API로, REST는 자원을 이름으로 구분하여 해당 자원의 상태를 주고 받는 모든 것을 의미합니다.
+- 즉, HTTP URI를 통해 자원(Rescource)을 명시하고, HTTP Method(POST, GET, PUT, DELETE)를 통해 해당 자원(URI)에 대한 CRUD Operation을 적용하는 것을 의미합니다.
+
+* Create : POST
+* Read : GET
+* Update : PUT
+* Delete : DELETE
