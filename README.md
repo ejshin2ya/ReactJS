@@ -406,7 +406,8 @@ export default function DayList() {
 
 - DayList.js와 Day.js에서 json 데이터를 꺼내오는 과정에서 반복되는 로직이 발생하였다.
 - Custom Hooks를 이용하면 반복되는 로직을 여러 컴포넌트에서 쉽게 사용하고 수정도 가능하다.
-  \*useFetch.js 라는 이름으로 Custom Hooks를 만들었다.
+
+* useFetch.js 라는 이름으로 Custom Hooks를 만들었다.
 
 > useFetch.js
 
@@ -474,3 +475,89 @@ export default function DayList() {
 ```
 
 - Custom Hooks를 통해 DayList.js와 Day.js 컴포넌트의 코드가 간결해졌다.
+
+> useState 란?
+
+- hooks의 한 종류로 함수형 컴포넌트에서 가변적인 상태를 관리할 수 있게 해주며 배열을 반환한다. 즉, 하나의 변수처럼 사용할 수 있다.
+- const[state, setState] = useState(initialState)
+- 배열의 첫번째 요소는 상태값 저장 변수(state)이며, 두번째 요소는 상태값 갱신 함수(setState)이다.
+- 즉, state에 초기값이 들어가 있고, 나중에 이 state를 바꾸고 싶다면 setState를 이용해서 변경해 줄 수 있다.
+
+## 14. PUT(수정), DELETE(삭제)
+
+> PUT(수정) 이란?
+
+- put은 crud 중 update에 해당하며 수정하기 위해 사용
+- method 옵션으로 "PUT"입력
+- headers의 "Content-Type"은 보내는 리소스 타입을 의미하며, 이미지, json등 입력 가능
+- body부분은 정보를 가져오는 get과는 다르게 PUT의 수정 정보를 실어주기 위해 내용 작성
+- JSON.stringify는 JSON 문자열로 바꿔서 데이터를 수정하기 위해 사용
+- 외운 단어를 checkbox에서 선택하면 json 데이터의 isDone값을 바꿔주기 위해 PUT(수정)
+
+> DELETE(삭제) 란?
+
+- 삭제하기 전 실수로 지워지는 것 방지를 위해 window.confirm을 사용하여 팝업창으로 재확인 문구를 띄워준다.
+- 삭제는 정보를 넘겨줄 필요가 없기 때문에 method :"DELETE" 까지만 작성
+- 삭제 후 새로운 화면을 그려주지 않기 때문에, useState를 사용하여 새로운 상태를 그려준다.
+- 삭제 응답이 오면 id값을 0으로 바꿔준 후 id값이 0인 단어는 null값으로 리턴해준다.
+
+> Word.js
+
+````
+import { useState } from "react";
+
+export default function Word({ word: w }) {
+  //props로 넘어온 word를 새로운 변수명 w로 할당
+  const [word, setWord] = useState(w);
+  const [isShow, setIsShow] = useState(false);
+  const [isDone, setIsDone] = useState(word.isDone);
+
+  function toggleShow() {
+    setIsShow(!isShow);
+  }
+  function toggleDone() {
+    // setIsDone(!isDone);
+    fetch(`http://localhost:3001/words/${word.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...word, //기존 데이터에 isDone 내용만 바꿔서 보내줌
+        isDone: !isDone,
+      }),
+    }).then((res) => {
+      if (res.ok) {
+        setIsDone(!isDone);
+      }
+    });
+  }
+
+  function del() {
+    if (window.confirm("삭제 하시겠습니까?")) {
+      fetch(`http://localhost:3001/words/${word.id}`, {
+        method: "DELETE",
+      }).then((res) => {
+        setWord({ id: 0 });
+      });
+    }
+  }
+  if (word.id === 0) {
+    return null;
+  }
+  return (
+    <tr className={isDone ? "off" : ""}>
+      <td>
+        <input type="checkbox" checked={isDone} onChange={toggleDone} />
+      </td>
+      <td>{word.eng}</td>
+      <td>{isShow && word.kor}</td>
+      <td>
+        <button onClick={toggleShow}>뜻 {isShow ? "숨기기" : "보기"}</button>
+        <button onClick={del} className="btn_del">
+          삭제
+        </button>
+      </td>
+    </tr>
+    ```
+````
