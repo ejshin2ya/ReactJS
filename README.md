@@ -353,3 +353,51 @@ export default function Word({ word }) {
 * Read : GET
 * Update : PUT
 * Delete : DELETE
+
+## 12. useEffect, fetch()로 API호출
+
+> useEffect 란?
+
+- react hooks 중 하나로 어떤 상태값이 바뀌었을떄 동작하는 함수이며, 첫번째 매개변수로 함수를 넣는다.
+- 두번째 매개변수로 count를 넣어줌으로써 count가 변화할때만 이 함수를 실행도 가능
+- 이처럼 count가 변화할때마다 useEffect가 동작하는 것을 의존성 배열이라고 함. count라는 의존성 배열이 변경될 경우에만 이 함수 실행
+- useEffect를 사용하는 목적 : 렌더링이 되고나서 api를 호출하기 위해 사용하며,
+- 렌더링 완료후 최초 딱 한번만 api를 호출하기 위해서는 의존성 배열에 값을 넣지 않은 빈배열 입력
+
+> fetch() 란?
+
+- API 비동기 통신을 위해 사용
+- 예전에는 클라이언트 단에서 직접 http 요청 응답 받는 것이 복잡하여 서버 단에서 API를 호출하였으나, 요즘에는 라이브러리 도움 없이도 fetch()함수를 이용하여 클라이언트단에서 api를 호출하는 것이 가능해졌다.
+- fetch() 함수는 첫번째 인자로 url, 두번쨰 인자로 옵션 객체를 받고, Promise 타입의 객체를 반환한다.
+- promise 후속 처리 메서드인 then을 사용하여 resolve한 객체를 전달받을 수 있다.
+- 반환된 객체는 API 호출이 성공했을 경우에는 응답(response) resolve하고 실패했을 경우에는 예외(error) 객체를 reject한다.
+
+```
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+export default function DayList() {
+  const [days, setDays] = useState([]); //dummy 사용하던 것을 api에서 리스트를 가져와서 바꾸는 과정(days라는 useState 사용)
+
+  //api 비동기 통신을 위해 fetch 사용
+  useEffect(() => {
+    fetch("http://localhost:3001/days")
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setDays(data);
+      });
+  }, []);
+
+  return (
+    <ul className="list_day">
+      {days.map((day) => (
+        <li key={day.id}>
+          <Link to={`/day/${day.day}`}>Day {day.day}</Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
